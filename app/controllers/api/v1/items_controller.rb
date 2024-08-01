@@ -1,6 +1,12 @@
 class Api::V1::ItemsController < ApplicationController
   def index
-    render json: ItemSerializer.new(Item.all), status: :ok
+    items = Item.all
+
+    if params[:sorted].present? && params[:sorted] == "price"
+      items = Item.sort_by_price
+    end
+
+    render json: ItemSerializer.new(items), status: :ok
   end
 
   def show

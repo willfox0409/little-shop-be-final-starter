@@ -36,6 +36,42 @@ describe "Merchants API", :type => :request do
       expect(json[:data][1][:attributes][:name]).to eq(middle.name)
       expect(json[:data][2][:attributes][:name]).to eq(last.name)
     end
+
+    it "should return merchants with invoices with status of returned when parameter is present" do
+      customer = create(:customer)
+      merchant1 = create(:merchant)
+      merchant2 = create(:merchant)
+      create(:invoice, status: "returned", customer_id: customer.id, merchant_id: merchant1.id)
+      create_list(:invoice, 3, status: "shipped", customer_id: customer.id, merchant_id: merchant1.id)
+      create(:invoice, status: "packaged", customer_id: customer.id, merchant_id: merchant2.id)
+      create(:invoice, status: "shipped", customer_id: customer.id, merchant_id: merchant2.id)
+
+      get "/api/v1/merchants?status=returned"
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:ok)
+      expect(json[:data].count).to eq(1)
+      expect(json[:data][0][:id]).to eq(merchant1.id.to_s)
+    end
+
+    it "should return an item_count attribute when the param is present" do
+      merchant = create(:merchant)
+      create_list(:item, 10, merchant_id: merchant.id)
+
+      merchant2 = create(:merchant)
+      create_list(:item, 2, merchant_id: merchant2.id)
+
+      merchant3 = create(:merchant)
+      create_list(:item, 7, merchant_id: merchant3.id)
+
+      get "/api/v1/merchants?count=true"
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:ok)
+      expect(json[:data][0][:attributes][:item_count]).to eq(10)
+      expect(json[:data][1][:attributes][:item_count]).to eq(2)
+      expect(json[:data][2][:attributes][:item_count]).to eq(7)
+    end
   end
 
   describe "get a merchant by id" do

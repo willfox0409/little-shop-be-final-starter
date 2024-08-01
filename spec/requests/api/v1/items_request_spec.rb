@@ -15,6 +15,20 @@ describe "Items API", :type => :request do
       expect(json[:data].first).to include(:id, :type, :attributes)
       expect(json[:data].first[:attributes]).to include(:name, :description, :unit_price)
     end
+
+    it "should return items sorted by price when parameter is present" do
+      middle = create(:item, unit_price: 50)
+      cheap = create(:item, unit_price: 10)
+      expensive = create(:item, unit_price: 100)
+
+      get "/api/v1/items?sorted=price"
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:ok)
+      expect(json[:data][0][:attributes][:name]).to eq(cheap.name)
+      expect(json[:data][1][:attributes][:name]).to eq(middle.name)
+      expect(json[:data][2][:attributes][:name]).to eq(expensive.name)
+    end
   end
 
   describe "GET item by id" do

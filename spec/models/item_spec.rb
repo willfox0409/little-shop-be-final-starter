@@ -11,6 +11,16 @@ describe Item, type: :model do
     it { should belong_to :merchant }
   end
 
+  describe "class methods" do
+    it "should sort items by price, cheapest to most expensive" do
+      middle = create(:item, unit_price: 145)
+      cheap = create(:item, unit_price: 100)
+      expensive = create(:item, unit_price: 1000)
+
+      expect(Item.sort_by_price).to eq([cheap, middle, expensive])
+    end
+  end
+
   describe 'search functions' do
     let(:merchant) { create(:merchant) }
     it 'should return the first item by name' do
