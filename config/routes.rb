@@ -7,4 +7,14 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  namespace :api do
+    namespace :v1 do
+      resources :items, except: [:new, :edit] do
+        get "/merchant", to: "item_merchants#show"
+      end
+      resources :merchants, except: [:new, :edit] do
+        resources :items, only: :index, controller: "merchant_items"
+      end
+    end
+  end
 end
