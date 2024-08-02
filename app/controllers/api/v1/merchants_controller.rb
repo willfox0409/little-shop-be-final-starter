@@ -10,12 +10,12 @@ class Api::V1::MerchantsController < ApplicationController
     end
 
     include_count = params[:count].present? && params[:count] == "true"
-    render json: MerchantSerializer.new(merchants, { params: { count: include_count }}), status: :ok
+    render json: MerchantSerializer.new(merchants, { params: { count: include_count }})
   end
 
   def show
     merchant = Merchant.find(params[:id])
-    render json: MerchantSerializer.new(merchant), status: :ok
+    render json: MerchantSerializer.new(merchant)
   end
 
   def create
@@ -27,7 +27,7 @@ class Api::V1::MerchantsController < ApplicationController
     merchant = Merchant.find(params[:id])
     merchant.update!(merchant_params)
 
-    render json: MerchantSerializer.new(merchant), status: :ok
+    render json: MerchantSerializer.new(merchant)
   end
 
   def destroy

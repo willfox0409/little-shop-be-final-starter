@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe "Merchants API", :type => :request do
+describe "Merchant endpoints", :type => :request do
   describe "Get all merchants" do
     it "should return a properly array of merchants" do
       create_list(:merchant, 5)

@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe "Items API", :type => :request do
+describe "Item endpoints", :type => :request do
   let(:merchant) { Merchant.create!(name: "We got dogs") }
 
   describe "GET all items" do
