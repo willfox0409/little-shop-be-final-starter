@@ -7,6 +7,8 @@ describe Merchant, type: :model do
 
   describe 'relationships' do
     it { should have_many :items }
+    it { should have_many :invoices }
+    it { should have_many(:customers).through(:invoices) }
   end
 
   describe "class methods" do
@@ -42,6 +44,23 @@ describe Merchant, type: :model do
 
       expect(merchant.item_count).to eq(8)
       expect(merchant2.item_count).to eq(4)
+    end
+
+    it "#distinct_customers should return all customers for a merchant" do
+      merchant1 = create(:merchant)
+      customer1 = create(:customer)
+      customer2 = create(:customer)
+      customer3 = create(:customer)
+
+      merchant2 = create(:merchant)
+
+      create_list(:invoice, 3, merchant_id: merchant1.id, customer_id: customer1.id)
+      create_list(:invoice, 2, merchant_id: merchant1.id, customer_id: customer2.id)
+
+      create_list(:invoice, 2, merchant_id: merchant2.id, customer_id: customer3.id)
+
+      expect(merchant1.distinct_customers).to match_array([customer1, customer2])
+      expect(merchant2.distinct_customers).to eq([customer3])
     end
   end
 end

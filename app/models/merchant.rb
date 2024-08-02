@@ -2,8 +2,8 @@ class Merchant < ApplicationRecord
   validates_presence_of :name
   has_many :items
   has_many :invoices
+  has_many :customers, through: :invoices
   # has_many :invoice_items, through: :invoices
-  # has_many :customers, through: :invoices
   # has_many :transactions, through: :invoices
 
   def self.sorted_by_creation
@@ -16,5 +16,18 @@ class Merchant < ApplicationRecord
 
   def item_count
     items.count
+  end
+
+  def distinct_customers
+    # self.customers.distinct # This is possible due to the additional association on line 5
+    
+    # SQL option: SELECT DISTINCT * FROM customers JOIN invoices ON invoices.customer_id = customers.id 
+    #             JOIN merchants ON merchants.id = invoices.customer_id 
+    #             WHERE merchants.id = #{self.id}"
+    
+    # AR option without additional association
+    Customer
+      .joins(invoices: :merchant)
+      .where("merchants.id = ?", self.id).distinct
   end
 end
