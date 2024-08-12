@@ -1,24 +1,14 @@
-# README
+# Little Shop
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This repository is the completed API for use with the Mod 2 Group Project. The FE repo for Little Shop lives [here](https://github.com/turingschool-examples/little-shop-fe-vite).
 
-Things you may want to cover:
+This repo can be used as the starter repo for the Mod 2 final project.
 
-* Ruby version
+## Setup
 
-* System dependencies
+```ruby
+bundle install
+rails db:{drop,create,migrate,seed}
+```
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+This repo uses a pgdump file to seed the database. Your `db:seed` command will produce lots of output, and that's normal. 
