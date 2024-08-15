@@ -62,5 +62,21 @@ describe Merchant, type: :model do
       expect(merchant1.distinct_customers).to match_array([customer1, customer2])
       expect(merchant2.distinct_customers).to eq([customer3])
     end
+
+    it "#invoices_filtered_by_status should return all invoices for a customer that match the given status" do
+      merchant = create(:merchant)
+      other_merchant = create(:merchant)
+      customer = create(:customer)
+      inv_1_shipped = Invoice.create!(status: "shipped", merchant: merchant, customer: customer)
+      inv_2_shipped = Invoice.create!(status: "shipped", merchant: merchant, customer: customer)
+      inv_3_packaged = Invoice.create!(status: "packaged", merchant: merchant, customer: customer)
+      inv_4_packaged = Invoice.create!(status: "packaged", merchant: other_merchant, customer: customer)
+      inv_5_returned = Invoice.create!(status: "returned", merchant: merchant, customer: customer)
+
+      expect(merchant.invoices_filtered_by_status("shipped")).to match_array([inv_1_shipped, inv_2_shipped])
+      expect(merchant.invoices_filtered_by_status("packaged")).to eq([inv_3_packaged])
+      expect(merchant.invoices_filtered_by_status("returned")).to eq([inv_5_returned])
+      expect(other_merchant.invoices_filtered_by_status("packaged")).to eq([inv_4_packaged])
+    end
   end
 end
