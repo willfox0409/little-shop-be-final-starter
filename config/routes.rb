@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       resources :merchants, except: [:new, :edit] do
         resources :items, only: :index, controller: "merchant/items"
         resources :customers, only: :index, controller: "merchant/customers"
+        resources :invoices, only: :index, controller: "merchant/invoices"
       end
     end
   end

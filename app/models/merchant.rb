@@ -30,4 +30,8 @@ class Merchant < ApplicationRecord
       .joins(invoices: :merchant)
       .where("merchants.id = ?", self.id).distinct
   end
+
+  def invoices_filtered_by_status(status)
+    invoices.where(status: status)
+  end
 end
