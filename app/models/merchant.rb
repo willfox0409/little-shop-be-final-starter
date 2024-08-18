@@ -34,4 +34,12 @@ class Merchant < ApplicationRecord
   def invoices_filtered_by_status(status)
     invoices.where(status: status)
   end
+
+  def find_all_by_name(name)
+    Merchant.where("name iLIKE ?", "%#{name}%")
+  end
+
+  def self.find_one_merchant_by_name(name)
+    Merchant.find_all_by_name(name).order("LOWER(name)").first
+  end
 end
