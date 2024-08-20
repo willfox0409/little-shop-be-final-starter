@@ -29,7 +29,7 @@ class Api::V1::Items::SearchController < ApplicationController
 
   def validate_params
     render_error if price_params_negative?(params)
-    render_error if params.empty?
+    render_error if no_search_params?(params)
     render_error if name_and_price_params_included?(params)
   end
 
@@ -41,6 +41,10 @@ class Api::V1::Items::SearchController < ApplicationController
     return true if params[:min_price].present? && params[:min_price].to_f < 0
 
     params[:max_price].present? && params[:max_price].to_f < 0
+  end
+
+  def no_search_params?(params)
+    !params[:min_price].present? && !params[:max_price].present? && !params[:name].present?
   end
 
   def render_error

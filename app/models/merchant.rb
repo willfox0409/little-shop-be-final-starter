@@ -35,7 +35,7 @@ class Merchant < ApplicationRecord
     invoices.where(status: status)
   end
 
-  def find_all_by_name(name)
+  def self.find_all_by_name(name)
     Merchant.where("name iLIKE ?", "%#{name}%")
   end
 

@@ -11,8 +11,7 @@ class Api::V1::Merchants::SearchController < ApplicationController
   private
 
   def validate_params
-    render_error if !params[:name].present!
-    render_error if params[:name] == ""
+    render_error if !params[:name].present? || params[:name] == ""
   end
 
   def render_error
