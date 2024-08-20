@@ -2,35 +2,54 @@ class Api::V1::Items::SearchController < ApplicationController
   before_action :validate_params
 
   def show
-    if params[:name].present?
-      item = Item.find_one_item_by_name(params[:name])
-      render json: ItemSerializer.new(item), status: :ok
-    else
-      min = params[:min_price] if params[:min_price]
-      max = params[:max_price] if params[:max_price]
-      item = Item.find_one_item_by_price(min_price: min, max_price: max)
+    return handle_item_name_search(params) if params[:name].present?
+
+    min = params[:min_price] if params[:min_price]
+    max = params[:max_price] if params[:max_price]
+
+    item = Item.find_one_item_by_price(
+      **{ min_price: min }.compact,
+      **{ max_price: max }.compact
+    )
+
+    if item.present?
       render json: ItemSerializer.new(item)
+    else
+      render json: { data: { } }
     end
   end
 
   def index
-    if params[:name].present?
-      item = Item.find_all_by_name(params[:name])
-      render json: ItemSerializer.new(item), status: :ok
-    else
-      min = params[:min_price] if params[:min_price]
-      max = params[:max_price] if params[:max_price]
-      items = Item.find_items_by_price(min_price: min, max_price: max)
-      render json: ItemSerializer.new(items)
-    end
+    return handle_item_name_search(params) if params[:name].present?
+      
+    min = params[:min_price].to_f if params[:min_price]
+    max = params[:max_price].to_f if params[:max_price]
+
+    items = Item.find_items_by_price(
+      **{ min_price: min }.compact,
+      **{ max_price: max }.compact
+      )
+
+    render json: ItemSerializer.new(items)
   end
 
   private
 
+  def handle_item_name_search(params)
+    if params[:action] == "show"
+      search_response = Item.find_one_item_by_name(params[:name])
+      return render json: { data: { } } if search_response.nil?
+    elsif params[:action] == "index"
+      search_response = Item.find_all_by_name(params[:name])
+    end
+    render json: ItemSerializer.new(search_response), status: :ok
+  end
+
   def validate_params
-    render_error if price_params_negative?(params)
-    render_error if no_search_params?(params)
-    render_error if name_and_price_params_included?(params)
+    return render_error if price_params_negative?(params)
+    return render_error if no_search_params?(params)
+    return render_error if name_and_price_params_included?(params)
+    render_error if invalid_min_or_max?(params)
   end
 
   def name_and_price_params_included?(params)
@@ -43,14 +62,14 @@ class Api::V1::Items::SearchController < ApplicationController
     params[:max_price].present? && params[:max_price].to_f < 0
   end
 
-  def no_search_params?(params)
-    !params[:min_price].present? && !params[:max_price].present? && !params[:name].present?
+  def invalid_min_or_max?(params)
+    min = params[:min_price] ? params[:min_price].to_f : 0
+    max = params[:max_price] ? params[:max_price].to_f : Float::MAX
+
+    min > max
   end
 
-  def render_error
-    render json: { 
-      message: "your query could not be completed", 
-      error: ["invalid search params"] },
-        status: :bad_request
+  def no_search_params?(params)
+    !params[:min_price].present? && !params[:max_price].present? && !params[:name].present?
   end
 end

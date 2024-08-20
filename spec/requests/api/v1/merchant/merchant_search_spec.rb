@@ -16,18 +16,26 @@ RSpec.describe "Search Endpoints" do
       expect(json[:data][:attributes][:name]).to eq("Crate and Barrel")
     end
 
+    it "returns an empty data object if no merchant is found" do
+      get "/api/v1/merchants/find?name=NOMATCH"
+
+      expect(response).to be_successful
+      json = JSON.parse(response.body, symbolize_names: true)
+      expect(json[:data]).to eq({})
+    end
+
     it "returns an error if name is missing" do
       get "/api/v1/merchants/find"
       expect(response).to_not be_successful
       json = JSON.parse(response.body, symbolize_names: true)
-      expect(json[:error][0]).to eq("invalid search params")
+      expect(json[:errors][0]).to eq("invalid search params")
     end
 
     it "returns an error if name is blank" do
       get "/api/v1/merchants/find?name="
       expect(response).to_not be_successful
       json = JSON.parse(response.body, symbolize_names: true)
-      expect(json[:error][0]).to eq("invalid search params")
+      expect(json[:errors][0]).to eq("invalid search params")
     end
   end
 
@@ -45,7 +53,7 @@ RSpec.describe "Search Endpoints" do
       get "/api/v1/merchants/find_all?name="
       expect(response).to_not be_successful
       json = JSON.parse(response.body, symbolize_names: true)
-      expect(json[:error][0]).to eq("invalid search params")
+      expect(json[:errors][0]).to eq("invalid search params")
     end
   end
 end
