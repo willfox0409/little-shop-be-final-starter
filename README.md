@@ -13,4 +13,4 @@ rails db:{drop,create,migrate,seed}
 
 This repo uses a pgdump file to seed the database. Your `db:seed` command will produce lots of output, and that's normal. 
 
-Run your server with `rails s`
+Run your server with `rails s` and you should be able to access endpoints via localhost:3000.
