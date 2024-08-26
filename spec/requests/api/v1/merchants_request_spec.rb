@@ -187,5 +187,16 @@ describe "Merchant endpoints", :type => :request do
       expect(json[:errors].first).to eq("Couldn't find Merchant with 'id'=678")
     end
 
+    it "should successfully delete merchant and use cascading deletes if merchant has child records" do
+      merchant = create(:merchant)
+      customer = create(:customer)
+      invoices = create_list(:invoice, 5, merchant_id: merchant.id, customer_id: customer.id)
+      items = create_list(:item, 5, merchant_id: merchant.id)
+      InvoiceItem.create!(invoice: invoices[0], item: items[0], quantity: 5, unit_price: 100)
+      delete "/api/v1/merchants/#{merchant.id}"
+      
+      expect(response).to have_http_status(:no_content)
+    end
+
   end
 end
