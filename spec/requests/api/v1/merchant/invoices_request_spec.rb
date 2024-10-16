@@ -2,14 +2,16 @@ require "rails_helper"
 
 RSpec.describe "Merchant invoices endpoints" do
   before :each do
-    @merchant2 = create(:merchant)
-    @merchant1 = create(:merchant)
+    @merchant2 = Merchant.create!(name: "Merchant")
+    @merchant1 = Merchant.create!(name: "Merchant Again")
 
-    @customer1 = create(:customer)
-    @customer2 = create(:customer)
+    @customer1 = Customer.create!(first_name: "Papa", last_name: "Gino")
+    @customer2 = Customer.create!(first_name: "Jimmy", last_name: "John")
 
     @invoice1 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "packaged")
-    create_list(:invoice, 3, merchant_id: @merchant1.id, customer_id: @customer1.id) # shipped by default
+    Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
+    Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
+    Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
     @invoice2 = Invoice.create!(customer: @customer1, merchant: @merchant2, status: "shipped")
   end
 

@@ -46,8 +46,12 @@ describe Merchant, type: :model do
 
   describe "instance methods" do
     it "#item_count should return the count of items for a merchant" do
-      merchant = create(:merchant)
-      merchant2 = create(:merchant)
+      merchant = Merchant.create!(name: "My merchant")
+      merchant2 = Merchant.create!(name: "My other merchant")
+
+      # These FactoryBot methods create lots of test data quickly with random attributes
+      # The line below is the equivalent of running `merchant.items.create!` 8 times
+      # In your new tests, you do not need to use FactoryBot unless you'd like to explore it
       create_list(:item, 8, merchant_id: merchant.id)
       create_list(:item, 4, merchant_id: merchant2.id)
 

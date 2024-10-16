@@ -38,13 +38,14 @@ describe "Merchant endpoints", :type => :request do
     end
 
     it "should return merchants with invoices with status of returned when parameter is present" do
-      customer = create(:customer)
-      merchant1 = create(:merchant)
-      merchant2 = create(:merchant)
-      create(:invoice, status: "returned", customer_id: customer.id, merchant_id: merchant1.id)
+      customer = Customer.create!(first_name: "John", last_name: "Doe")
+      merchant1 = Merchant.create!(name: "Merchant1")
+      merchant2 = Merchant.create!(name: "Merchant2")
+      Invoice.create!(status: "returned", customer_id: customer.id, merchant_id: merchant1.id)
+      # The below factory_bot method will create 3 invoices
       create_list(:invoice, 3, status: "shipped", customer_id: customer.id, merchant_id: merchant1.id)
-      create(:invoice, status: "packaged", customer_id: customer.id, merchant_id: merchant2.id)
-      create(:invoice, status: "shipped", customer_id: customer.id, merchant_id: merchant2.id)
+      Invoice.create!(status: "packaged", customer_id: customer.id, merchant_id: merchant2.id)
+      Invoice.create!(status: "shipped", customer_id: customer.id, merchant_id: merchant2.id)
 
       get "/api/v1/merchants?status=returned"
       json = JSON.parse(response.body, symbolize_names: true)
@@ -55,6 +56,8 @@ describe "Merchant endpoints", :type => :request do
     end
 
     it "should return an item_count attribute when the param is present" do
+      # This test uses FactoryBot methods to create a lot of test data quickly with random attributes
+      # You do not need to use these factory bot methods in your project but you're welcome to try it.
       merchant = create(:merchant)
       create_list(:item, 10, merchant_id: merchant.id)
 
