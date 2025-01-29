@@ -140,6 +140,20 @@ describe "Item endpoints", :type => :request do
       expect(response).to have_http_status(:not_found)
       expect(json[:errors].first).to eq("Couldn't find Item with 'id'=235")
     end
+
+    it "should return an error when updating an item with an invalid merchant_id" do
+      item = create(:item, merchant: merchant)
+      invalid_merchant_id = 999999
+      body = {
+        merchant_id: invalid_merchant_id
+      }
+
+      patch "/api/v1/items/#{item.id}", params: body, as: :json
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:not_found)
+      expect(json[:errors].first).to eq("Couldn't find Merchant with 'id'=999999")
+    end
   end
 
   describe "Delete Item" do
@@ -159,4 +173,3 @@ describe "Item endpoints", :type => :request do
     end
   end
 end
-

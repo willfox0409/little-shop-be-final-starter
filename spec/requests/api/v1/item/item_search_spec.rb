@@ -11,7 +11,7 @@ RSpec.describe "Item Search Endpoints" do
 
         get api_v1_items_find_index_path, params: {name: "rush"}
         json = JSON.parse(response.body, symbolize_names: true)
-        
+
         expect(json[:data][:attributes][:name]).to eq("brush")
       end
 
@@ -23,6 +23,16 @@ RSpec.describe "Item Search Endpoints" do
         get api_v1_items_find_index_path, params: { min_price: 0, max_price: 3}
         json = JSON.parse(response.body, symbolize_names: true)
         expect(json[:data][:attributes][:name]).to eq("apple")
+      end
+
+      it "should return an empty data object if no item is found by price" do
+        item1 = create(:item, name: "apple", unit_price: 1.09, merchant: merchant)
+        item2 = create(:item, name: "banana", unit_price: 0.99, merchant: merchant)
+
+        get api_v1_items_find_index_path, params: { min_price: 5, max_price: 10 }
+        json = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json[:data]).to eq({})
       end
     end
 
@@ -72,6 +82,18 @@ RSpec.describe "Item Search Endpoints" do
       item_names = json[:data].map { |element| element[:attributes][:name] }
       expect(item_names).to match_array(["apple", "banana"])
 
+    end
+
+    it "should return all items that match the name query" do
+      item1 = create(:item, name: "apple pie", merchant: merchant)
+      item2 = create(:item, name: "apple juice", merchant: merchant)
+      item3 = create(:item, name: "banana", merchant: merchant)
+
+      get api_v1_items_find_all_index_path, params: { name: "apple" }
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      item_names = json[:data].map { |element| element[:attributes][:name] }
+      expect(item_names).to match_array(["apple pie", "apple juice"])
     end
   end
 end
