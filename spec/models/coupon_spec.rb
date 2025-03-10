@@ -15,7 +15,7 @@ describe Coupon, type: :model do
 
   describe '#increment_usage!' do 
     it 'should increase usage_count by 1' do 
-      coupon  create(:coupon, usage_count: 0)
+      coupon = create(:coupon, usage_count: 0)
 
       coupon.increment_usage!
       updated_coupon = Coupon.find(coupon.id) 
