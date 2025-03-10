@@ -32,4 +32,16 @@ describe Coupon, type: :model do
       expect(updated_coupon.usage_count).to eq(1)
     end
   end
+
+  describe 'custom validations' do
+    it "should not allow more than 5 active coupons" do
+      merchant = create(:merchant)
+      create_list(:coupon, 5, merchant: merchant, active: true)  
+
+      new_coupon = build(:coupon, merchant: merchant, active: true)  
+
+      expect(new_coupon.valid?).to be false  
+      expect(new_coupon.errors[:base]).to include("Merchant cannot have more than 5 active coupons")
+    end
+  end
 end
