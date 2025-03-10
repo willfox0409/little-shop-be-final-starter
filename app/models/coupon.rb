@@ -16,15 +16,17 @@ class Coupon < ApplicationRecord
         update!(usage_count: (usage_count || 0) + 1)
     end
 
+    def toggle_active!
+      update!(active: !active)  
+    end
+    
     private
 
     def max_active_coupons
-      if merchant.coupons.where(active: true).count >= 5
+      return unless merchant 
+    
+      if active? && merchant.coupons.where(active: true).count >= 5
         errors.add(:base, "Merchant cannot have more than 5 active coupons")
       end
-    end
-
-    def toggle_active!
-      update!(active: !active)  
     end
 end
