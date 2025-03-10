@@ -23,4 +23,8 @@ class Coupon < ApplicationRecord
         errors.add(:base, "Merchant cannot have more than 5 active coupons")
       end
     end
+
+    def toggle_active!
+      update!(active: !active)  
+    end
 end
