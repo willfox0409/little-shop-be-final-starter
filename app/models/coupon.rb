@@ -9,4 +9,8 @@ class Coupon < ApplicationRecord
     validates :usage_count, numericality: { greater_than_or_equal_to: 0 }
 
     attribute :usage_count, :integer, default: 0
+
+    def increment_usage!
+        update!(usage_count: usage_count += 1)
+    end
 end
