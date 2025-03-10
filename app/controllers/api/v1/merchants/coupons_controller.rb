@@ -18,6 +18,10 @@ class Api::V1::Merchants::CouponsController < ApplicationController
 
   def update
     coupon = @merchant.coupons.find(params[:id])
+    
+    if params[:coupon].key?(:active)
+      coupon.toggle_active!
+    end
     coupon.update!(coupon_params)
 
     render json: CouponSerializer.new(coupon)
