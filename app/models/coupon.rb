@@ -11,6 +11,6 @@ class Coupon < ApplicationRecord
     attribute :usage_count, :integer, default: 0
 
     def increment_usage!
-        update!(usage_count: usage_count += 1)
+        update!(usage_count: (usage_count || 0) + 1)
     end
 end
