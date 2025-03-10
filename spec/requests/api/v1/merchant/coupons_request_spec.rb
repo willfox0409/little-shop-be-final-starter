@@ -68,6 +68,54 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
     end
   end
 
+  describe "POST /create (Sad Paths)" do
+    it "should not allow a merchant to have more than 5 active coupons" do
+      merchant = create(:merchant)
+      create_list(:coupon, 5, merchant: merchant, active: true)  
+  
+      new_coupon_params = {
+        coupon: {
+          name: "Extra Discount",
+          code: "EXTRA10",
+          discount_value: 10,
+          discount_type: "percent",
+          active: true  # should fail because this makes 6 active!
+        }
+      }
+  
+      headers = { "CONTENT_TYPE" => "application/json" }
+  
+      post "/api/v1/merchants/#{merchant.id}/coupons", headers: headers, params: JSON.generate(new_coupon_params)
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json[:errors]).to include("Validation failed: Merchant cannot have more than 5 active coupons")
+    end
+  
+    it "should not allow duplicate coupon codes" do
+      merchant = create(:merchant)
+      create(:coupon, merchant: merchant, code: "UNIQUE50")  
+  
+      duplicate_coupon_params = {
+        coupon: {
+          name: "Duplicate Discount",
+          code: "UNIQUE50",  # code is already in use
+          discount_value: 50,
+          discount_type: "dollar",
+          active: true
+        }
+      }
+  
+      headers = { "CONTENT_TYPE" => "application/json" }
+  
+      post "/api/v1/merchants/#{merchant.id}/coupons", headers: headers, params: JSON.generate(duplicate_coupon_params)
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json[:errors]).to include("Validation failed: Code has already been taken")
+    end
+  end
+
   describe "PATCH /update" do
     it "should properly update an existing coupon" do
       merchant = create(:merchant)
