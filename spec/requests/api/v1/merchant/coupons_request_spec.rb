@@ -68,31 +68,23 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
     end
   end
 
-  # describe "Update merchant" do
-  #   it "should properly update an existing merchant" do
-  #     merchant = create(:merchant)
-  #     new_name = "new name"
-  #     body = {
-  #       name: new_name
-  #     }
-  #     patch "/api/v1/merchants/#{merchant.id}", params: body, as: :json
-  #     json = JSON.parse(response.body, symbolize_names: true)
+  describe "PATCH /update" do
+    it "should properly update an existing coupon" do
+      merchant = create(:merchant)
+      coupon = create(:coupon, merchant: merchant, name: "Halloween Special")
+        
+      new_name = "Spooky Savings"
+      body = {
+        coupon: {
+        name: new_name
+      }
+      }
+      patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}", params: JSON.generate(body), headers: { "CONTENT_TYPE" => "application/json" }
+      json = JSON.parse(response.body, symbolize_names: true)
 
-  #     expect(response).to have_http_status(:ok)
-  #     expect(json[:data][:attributes][:name]).to eq(new_name)
-  #     expect(Merchant.find(merchant.id).name).to eq(new_name)
-  #   end
-
-  #   it "should return 404 when id provided is not valid" do
-  #     body = {
-  #       name: "new name"
-  #     }
-
-  #     patch "/api/v1/merchants/235", params: body, as: :json
-  #     json = JSON.parse(response.body, symbolize_names: true)
-
-  #     expect(response).to have_http_status(:not_found)
-  #     expect(json[:errors].first).to eq("Couldn't find Merchant with 'id'=235")
-  #   end
-  # end
+      expect(response).to have_http_status(:ok)
+      expect(json[:data][:attributes][:name]).to eq(new_name)
+      expect(coupon.reload.name).to eq(new_name)
+    end
+  end
 end
