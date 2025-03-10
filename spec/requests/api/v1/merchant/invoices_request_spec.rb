@@ -13,6 +13,8 @@ RSpec.describe "Merchant invoices endpoints" do
     @invoice3 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
     @invoice4 = Invoice.create!(customer: @customer1, merchant: @merchant1, status: "shipped")
     @invoice5 = Invoice.create!(customer: @customer1, merchant: @merchant2, status: "shipped")
+
+    @coupon = create(:coupon, merchant: @merchant1)
   end
 
   it "should return all invoices for a given merchant based on status param" do
@@ -67,5 +69,48 @@ RSpec.describe "Merchant invoices endpoints" do
     expect(response).to be_successful
     expect(json[:data].count).to eq(4)
     expect(json[:data].map { |invoice| invoice[:id] }).to match_array([@invoice1.id.to_s, @invoice2.id.to_s, @invoice3.id.to_s, @invoice4.id.to_s])
+  end
+
+  describe "POST /create" do 
+    it "should successfully create an invoice for a merchant" do 
+      invoice_params = {
+        invoice: {
+          customer_id: @customer1.id,
+          status: "packaged",
+          coupon_id: @coupon.id  
+        }
+      }
+
+      headers = { "CONTENT_TYPE" => "application/json" }
+
+      post "/api/v1/merchants/#{@merchant1.id}/invoices", headers: headers, params: JSON.generate(invoice_params)
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:created)
+      expect(json[:data]).to include(:id, :type, :attributes)
+      expect(json[:data][:type]).to eq("invoice")
+      expect(json[:data][:attributes]).to include(:merchant_id, :customer_id, :status)
+      expect(json[:data][:attributes][:merchant_id]).to eq(@merchant1.id)
+      expect(json[:data][:attributes][:customer_id]).to eq(@customer1.id)
+      expect(json[:data][:attributes][:status]).to eq("packaged")
+      expect(json[:data][:attributes][:coupon_id]).to eq(@coupon.id)
+    end
+
+    it "should create an invoice without a coupon" do
+      invoice_params = {
+        invoice: {
+          customer_id: @customer1.id,
+          status: "shipped"
+        }
+      }
+
+      headers = { "CONTENT_TYPE" => "application/json" }
+
+      post "/api/v1/merchants/#{@merchant1.id}/invoices", headers: headers, params: JSON.generate(invoice_params)
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:created)
+      expect(json[:data][:attributes][:coupon_id]).to be_nil  
+    end
   end
 end
