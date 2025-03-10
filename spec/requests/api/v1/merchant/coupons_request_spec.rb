@@ -135,4 +135,34 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
       expect(coupon.reload.name).to eq(new_name)
     end
   end
+
+  describe "PATCH /update (Coupon Activation/Deactivation)" do
+    it "should deactivate an active coupon" do
+      merchant = create(:merchant)
+      coupon = create(:coupon, merchant: merchant, active: true)  # Starts as active
+  
+      patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}", 
+            headers: { "CONTENT_TYPE" => "application/json" }, 
+            params: JSON.generate(coupon: { active: false })  # Deactivate it
+  
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to have_http_status(:ok)
+      expect(json[:data][:attributes][:active]).to be false
+    end
+  
+    it "should activate a deactivated coupon" do
+      merchant = create(:merchant)
+      coupon = create(:coupon, merchant: merchant, active: false)  # Start as inactive
+  
+      patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}", 
+            headers: { "CONTENT_TYPE" => "application/json" }, 
+            params: JSON.generate(coupon: { active: true })  # Activate it
+  
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to have_http_status(:ok)
+      expect(json[:data][:attributes][:active]).to be true
+    end
+  end
 end
