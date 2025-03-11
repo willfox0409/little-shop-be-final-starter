@@ -187,7 +187,7 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
   end
 end
 
-describe "GET /index (Filtered by Status)" do
+describe "GET /index (Filtered by Coupon Status)" do
   before :each do
     @merchant = create(:merchant)
     @active_coupon = create(:coupon, merchant: @merchant, active: true)
