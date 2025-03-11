@@ -5,8 +5,8 @@ class Api::V1::Merchants::InvoicesController < ApplicationController
   
     invoices = invoices.where(status: params[:status]) if params[:status].present?
   
-    #  Only apply the coupon filter when explicitly requested
-    invoices = invoices.where.not(coupon_id: nil) if params[:only_with_coupons].present?
+    #  Only apply the coupon filter when explicitly requested as true
+    invoices = invoices.where.not(coupon_id: nil) if params[:only_with_coupons] == "true"
   
     render json: InvoiceSerializer.new(invoices)
   end
