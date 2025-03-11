@@ -186,3 +186,40 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
     end
   end
 end
+
+describe "GET /index (Filtered by Status)" do
+  before :each do
+    @merchant = create(:merchant)
+    @active_coupon = create(:coupon, merchant: @merchant, active: true)
+    @inactive_coupon = create(:coupon, merchant: @merchant, active: false)
+  end
+
+  it "should return only active coupons when status=active" do
+    get "/api/v1/merchants/#{@merchant.id}/coupons?status=active"
+
+    json = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(json[:data].count).to eq(1)
+    expect(json[:data].first[:attributes][:active]).to be true
+  end
+
+  it "should return only inactive coupons when status=inactive" do
+    get "/api/v1/merchants/#{@merchant.id}/coupons?status=inactive"
+
+    json = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(json[:data].count).to eq(1)
+    expect(json[:data].first[:attributes][:active]).to be false
+  end
+
+  it "should return all coupons if no status param is given" do
+    get "/api/v1/merchants/#{@merchant.id}/coupons"
+
+    json = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(json[:data].count).to eq(2)  
+  end
+end
