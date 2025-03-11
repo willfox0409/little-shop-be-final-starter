@@ -77,7 +77,39 @@ describe "Merchant endpoints", :type => :request do
     end
   end
 
-  describe "get a merchant by id" do
+  describe "GET /index (Merchants with Coupon and Invoice Counts)" do
+    before :each do
+      @merchant1 = create(:merchant)
+      @merchant2 = create(:merchant)
+  
+      @coupon1 = create(:coupon, merchant: @merchant1)
+      @coupon2 = create(:coupon, merchant: @merchant1)
+      
+      @customer = create(:customer)
+      create(:invoice, merchant: @merchant1, customer: @customer, coupon: @coupon1)
+      create(:invoice, merchant: @merchant1, customer: @customer, coupon: @coupon2)
+      create(:invoice, merchant: @merchant2, customer: @customer)  # No coupon used
+    end
+  
+    it "should return merchants with coupon and invoice coupon counts" do
+      get "/api/v1/merchants"
+  
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to be_successful
+      expect(json[:data].count).to eq(2)
+  
+      merchant1_data = json[:data][0][:attributes]
+      merchant2_data = json[:data][1][:attributes]
+  
+      expect(merchant1_data[:coupons_count]).to eq(2)
+      expect(merchant1_data[:invoice_coupon_count]).to eq(2)
+      expect(merchant2_data[:coupons_count]).to eq(0)
+      expect(merchant2_data[:invoice_coupon_count]).to eq(0)
+    end
+  end
+
+  describe "GET /show" do
     it "should return a single merchant with the correct id" do
       merchant = Merchant.create!(name: "Joe & Sons")
       get "/api/v1/merchants/#{merchant.id}"
