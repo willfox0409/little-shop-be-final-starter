@@ -1,11 +1,13 @@
 class Api::V1::Merchants::InvoicesController < ApplicationController
   def index
     merchant = Merchant.find(params[:merchant_id])
-    if params[:status].present?
-      invoices = merchant.invoices_filtered_by_status(params[:status])
-    else
-      invoices = merchant.invoices
-    end
+    invoices = merchant.invoices
+  
+    invoices = invoices.where(status: params[:status]) if params[:status].present?
+  
+    #  Only apply the coupon filter when explicitly requested
+    invoices = invoices.where.not(coupon_id: nil) if params[:only_with_coupons].present?
+  
     render json: InvoiceSerializer.new(invoices)
   end
 
