@@ -71,6 +71,37 @@ RSpec.describe "Merchant invoices endpoints" do
     expect(json[:data].map { |invoice| invoice[:id] }).to match_array([@invoice1.id.to_s, @invoice2.id.to_s, @invoice3.id.to_s, @invoice4.id.to_s])
   end
 
+  describe "GET /index (Merchant Invoices with Coupon ID)" do
+    before :each do
+      @merchant = create(:merchant)
+      @customer1 = create(:customer)
+      @customer2 = create(:customer)
+      @coupon1 = create(:coupon, merchant: @merchant)
+      @coupon2 = create(:coupon, merchant: @merchant)
+      
+      @invoice1 = create(:invoice, merchant: @merchant, customer: @customer1, status: "shipped", coupon: @coupon1)
+      @invoice2 = create(:invoice, merchant: @merchant, customer: @customer2, status: "shipped", coupon: @coupon2)
+      @invoice3 = create(:invoice, merchant: @merchant, customer: @customer1, status: "shipped", coupon: nil)  # ✅ No coupon used
+    end
+  
+    it "should return all invoices for a merchant, including coupon_id if one was used" do
+      get "/api/v1/merchants/#{@merchant.id}/invoices"
+  
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to be_successful
+      expect(json[:data].count).to eq(3)
+  
+      invoice1_data = json[:data][0]  
+      invoice2_data = json[:data][1]  
+      invoice3_data = json[:data][2]  
+  
+      expect(invoice1_data[:attributes][:coupon_id]).to eq(@invoice1.coupon_id)
+      expect(invoice2_data[:attributes][:coupon_id]).to eq(@invoice2.coupon_id)
+      expect(invoice3_data[:attributes][:coupon_id]).to be_nil  
+    end
+  end
+
   describe "POST /create" do 
     it "should successfully create an invoice for a merchant" do 
       invoice_params = {
