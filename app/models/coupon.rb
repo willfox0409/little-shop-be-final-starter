@@ -17,10 +17,19 @@ class Coupon < ApplicationRecord
   end
 
   def toggle_active!
-    update!(active: !active)  
+    if !active? || can_be_deactivated?
+      update!(active: !active)
+    else
+      errors.add(:base, "Cannot deactivate a coupon with pending invoices")
+      raise ActiveRecord::RecordInvalid, self
+    end
   end
   
   private
+  
+  def can_be_deactivated?
+    invoices.where(status: "packaged").empty?  
+  end
 
   def max_active_coupons
     return unless merchant 
