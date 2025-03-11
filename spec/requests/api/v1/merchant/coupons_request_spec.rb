@@ -181,7 +181,7 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
       json = JSON.parse(response.body, symbolize_names: true)
   
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(json[:errors]).to include("Cannot deactivate a coupon with pending invoices")
+      expect(json[:errors]).to include("Validation failed: Cannot deactivate a coupon with pending invoices")
       expect(coupon.reload.active).to be true  
     end
   end
