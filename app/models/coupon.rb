@@ -8,7 +8,7 @@ class Coupon < ApplicationRecord
   validates :discount_type, presence: true
   validates :usage_count, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
-  validate :max_active_coupons, on: :create 
+  validate :max_active_coupons, on: [:create, :update]
   
   attribute :usage_count, :integer, default: 0
 
@@ -17,7 +17,10 @@ class Coupon < ApplicationRecord
   end
 
   def toggle_active!
-    if !active? || can_be_deactivated?
+    if !active? && merchant.coupons.where(active: true).count >= 5
+      errors.add(:base, "Merchant cannot have more than 5 active coupons")
+      raise ActiveRecord::RecordInvalid, self
+    elsif !active? || can_be_deactivated?
       update!(active: !active)
     else
       errors.add(:base, "Cannot deactivate a coupon with pending invoices")
