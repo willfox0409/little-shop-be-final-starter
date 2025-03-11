@@ -24,6 +24,11 @@ class Coupon < ApplicationRecord
       raise ActiveRecord::RecordInvalid, self
     end
   end
+
+  def self.filter_by_status(status)
+    return all unless %w[active inactive].include?(status)  
+    where(active: status == "active")  
+  end
   
   private
   
