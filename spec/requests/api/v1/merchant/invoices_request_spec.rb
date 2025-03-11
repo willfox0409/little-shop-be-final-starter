@@ -102,6 +102,29 @@ RSpec.describe "Merchant invoices endpoints" do
     end
   end
 
+  describe "GET /index (Merchant Invoices with Coupon ID) - Sad Paths" do
+    it "should return a 404 error if the merchant does not exist" do
+      get "/api/v1/merchants/999999/invoices"  # Invalid Merchant
+    
+      json = JSON.parse(response.body, symbolize_names: true)
+    
+      expect(response).to have_http_status(:not_found)
+      expect(json[:errors].first).to match(/^Couldn't find Merchant/)
+    end
+
+    it "should return an empty array if the merchant has no invoices" do
+      merchant = create(:merchant)  #Create a merchant without invoices
+    
+      get "/api/v1/merchants/#{merchant.id}/invoices"
+    
+      json = JSON.parse(response.body, symbolize_names: true)
+    
+      expect(response).to have_http_status(:ok)
+      expect(json[:data]).to be_an(Array)
+      expect(json[:data]).to be_empty  # Ensures it returns an empty array
+    end
+  end
+
   describe "POST /create" do 
     it "should successfully create an invoice for a merchant" do 
       invoice_params = {
