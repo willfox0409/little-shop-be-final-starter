@@ -74,6 +74,19 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
     end 
   end
 
+  describe "GET /show (Sad Path)" do
+    it "should return a 404 error if the coupon does not exist" do
+      merchant = create(:merchant)
+  
+      get "/api/v1/merchants/#{merchant.id}/coupons/999999"  # Invalid Coupon ID
+  
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to have_http_status(:not_found)
+      expect(json[:errors].first).to match(/^Couldn't find Coupon/) # Use Regex to match the beginning of string
+    end
+  end
+
   describe "POST /create" do
     it "should successfully create when validations pass" do
       merchant = create(:merchant)
@@ -150,6 +163,33 @@ RSpec.describe "Api::V1::Merchants::Coupons", type: :request do
   
       expect(response).to have_http_status(:unprocessable_entity)
       expect(json[:errors]).to include("Validation failed: Code has already been taken")
+    end
+
+    it "should return 422 if required attributes are missing" do
+      merchant = create(:merchant)
+  
+      invalid_coupon_params = {
+        coupon: {
+          name: "",  # Name is missing
+          code: "",  # Code is missing
+          discount_value: nil,  # Discount value is missing
+          discount_type: "percent"
+        }
+      }
+  
+      headers = { "CONTENT_TYPE" => "application/json" }
+  
+      post "/api/v1/merchants/#{merchant.id}/coupons", headers: headers, params: JSON.generate(invalid_coupon_params)
+      json = JSON.parse(response.body, symbolize_names: true)
+  
+      expect(response).to have_http_status(:unprocessable_entity)
+      error_messages = json[:errors].first.split(", ")
+      expect(error_messages).to include(
+        "Validation failed: Name can't be blank", 
+        "Code can't be blank", 
+        "Discount value can't be blank",
+        "Discount value is not a number"
+        )
     end
   end
 
