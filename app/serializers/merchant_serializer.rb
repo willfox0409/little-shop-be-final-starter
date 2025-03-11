@@ -1,6 +1,6 @@
 class MerchantSerializer
   include JSONAPI::Serializer
-  attributes :name
+  attributes :name, :coupons_count, :invoice_coupon_count
 
   attribute :item_count, if: Proc.new { |merchant, params|
     params && params[:count] == true

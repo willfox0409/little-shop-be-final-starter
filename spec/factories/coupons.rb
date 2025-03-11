@@ -5,7 +5,7 @@ FactoryBot.define do
     code { Faker::Alphanumeric.alphanumeric(number: 6).upcase }
     discount_value { rand(5...50) }
     discount_type { ["dollar", "percent"].sample }
-    active { ["true", "false"].sample }
+    active { true }
     created_at { Time.current }
     updated_at { Time.current }
   end

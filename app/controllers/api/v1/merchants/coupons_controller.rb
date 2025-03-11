@@ -1,8 +1,13 @@
 class Api::V1::Merchants::CouponsController < ApplicationController
     before_action :merchant_setup
-
+  
   def index
-    coupons = @merchant.coupons
+    if params[:status].present?
+      coupons = @merchant.coupons.filter_by_status(params[:status])  
+    else
+      coupons = @merchant.coupons
+    end
+    
     render json: CouponSerializer.new(coupons)
   end
 
@@ -18,6 +23,10 @@ class Api::V1::Merchants::CouponsController < ApplicationController
 
   def update
     coupon = @merchant.coupons.find(params[:id])
+    
+    if params[:coupon].key?(:active)
+      coupon.toggle_active!
+    end
     coupon.update!(coupon_params)
 
     render json: CouponSerializer.new(coupon)
