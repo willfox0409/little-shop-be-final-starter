@@ -63,6 +63,27 @@ describe Coupon, type: :model do
       expect(duplicate_coupon.errors[:code]).to include("has already been taken")
     end
 
+    it "should not activate a coupon if merchant already has 5 active coupons" do
+      merchant = create(:merchant)
+      create_list(:coupon, 5, merchant: merchant, active: true) 
+      inactive_coupon = create(:coupon, merchant: merchant, active: false) 
+    
+      expect { inactive_coupon.toggle_active! }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Merchant cannot have more than 5 active coupons")
+    
+      expect(inactive_coupon.reload.active).to be false 
+    end
+
+    it "should not deactivate a coupon if it has pending invoices" do
+      merchant = create(:merchant)
+      customer = create(:customer)
+      coupon = create(:coupon, merchant: merchant, active: true) # Active coupon
+      invoice = create(:invoice, merchant: merchant, customer: customer, status: "packaged", coupon: coupon) # ✅ Pending invoice
+    
+      expect { coupon.toggle_active! }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Cannot deactivate a coupon with pending invoices")
+    
+      expect(coupon.reload.active).to be true # Ensure it remains active
+    end
+
     it "should not allow a negative discount value" do
       merchant = create(:merchant)
       invalid_coupon = build(:coupon, merchant: merchant, discount_value: -5)
@@ -87,4 +108,23 @@ describe Coupon, type: :model do
     end
   end
 
+  it "should filter coupons by active or inactive status" do
+    merchant = create(:merchant)
+    active_coupon = create(:coupon, merchant: merchant, active: true)
+    inactive_coupon = create(:coupon, merchant: merchant, active: false)
+  
+    expect(Coupon.filter_by_status("active")).to include(active_coupon)
+    expect(Coupon.filter_by_status("active")).not_to include(inactive_coupon)
+  
+    expect(Coupon.filter_by_status("inactive")).to include(inactive_coupon)
+    expect(Coupon.filter_by_status("inactive")).not_to include(active_coupon)
+  end
+
+  it "should return all coupons if status filter is invalid" do
+    merchant = create(:merchant)
+    active_coupon = create(:coupon, merchant: merchant, active: true)
+    inactive_coupon = create(:coupon, merchant: merchant, active: false)
+  
+    expect(Coupon.filter_by_status("invalid_status")).to include(active_coupon, inactive_coupon) # ✅ Returns all
+  end
 end
