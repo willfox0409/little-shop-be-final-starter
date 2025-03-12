@@ -73,6 +73,20 @@ describe Coupon, type: :model do
       expect(inactive_coupon.reload.active).to be false 
     end
 
+    
+    it "should allow updating an active coupon without triggering validation" do
+      merchant = create(:merchant)
+      create_list(:coupon, 5, merchant: merchant, active: true)  # merchant reaches the 5 active coupon limit
+      coupon = merchant.coupons.first  # Pick any active coupon
+  
+      expect {
+        coupon.update!(discount_value: 50)  # This should be allowed
+      }.not_to raise_error  # Ensures no validation error occurs
+  
+      expect(coupon.reload.discount_value).to eq(50)  # Confirm that update worked
+    end
+  
+
     it "should not deactivate a coupon if it has pending invoices" do
       merchant = create(:merchant)
       customer = create(:customer)
