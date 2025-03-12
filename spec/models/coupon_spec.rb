@@ -77,7 +77,7 @@ describe Coupon, type: :model do
       merchant = create(:merchant)
       customer = create(:customer)
       coupon = create(:coupon, merchant: merchant, active: true) # Active coupon
-      invoice = create(:invoice, merchant: merchant, customer: customer, status: "packaged", coupon: coupon) # ✅ Pending invoice
+      invoice = create(:invoice, merchant: merchant, customer: customer, status: "packaged", coupon: coupon) # Pending invoice
     
       expect { coupon.toggle_active! }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Cannot deactivate a coupon with pending invoices")
     
@@ -125,6 +125,6 @@ describe Coupon, type: :model do
     active_coupon = create(:coupon, merchant: merchant, active: true)
     inactive_coupon = create(:coupon, merchant: merchant, active: false)
   
-    expect(Coupon.filter_by_status("invalid_status")).to include(active_coupon, inactive_coupon) # ✅ Returns all
+    expect(Coupon.filter_by_status("invalid_status")).to include(active_coupon, inactive_coupon) # Returns all
   end
 end

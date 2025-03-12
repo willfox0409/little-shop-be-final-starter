@@ -81,7 +81,7 @@ RSpec.describe "Merchant invoices endpoints" do
       
       @invoice1 = create(:invoice, merchant: @merchant, customer: @customer1, status: "shipped", coupon: @coupon1)
       @invoice2 = create(:invoice, merchant: @merchant, customer: @customer2, status: "shipped", coupon: @coupon2)
-      @invoice3 = create(:invoice, merchant: @merchant, customer: @customer1, status: "shipped", coupon: nil)  # ✅ No coupon used
+      @invoice3 = create(:invoice, merchant: @merchant, customer: @customer1, status: "shipped", coupon: nil)  # No coupon used
     end
   
     it "should return all invoices for a merchant, including coupon_id if one was used" do

@@ -19,7 +19,7 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def create
-    merchant = Merchant.create!(merchant_params) # safe to use create! here because our exception handler will gracefully handle exception
+    merchant = Merchant.create!(merchant_params) 
     render json: MerchantSerializer.new(merchant), status: :created
   end
 
