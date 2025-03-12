@@ -8,7 +8,8 @@ class Coupon < ApplicationRecord
   validates :discount_type, presence: true
   validates :usage_count, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
-  validate :max_active_coupons, on: [:create, :update]
+  validate :max_active_coupons, on: :create
+  validate :max_active_coupons_on_activation, on: :update
   
   attribute :usage_count, :integer, default: 0
 
@@ -40,9 +41,17 @@ class Coupon < ApplicationRecord
   end
 
   def max_active_coupons
-    return unless merchant 
+    return unless merchant # if merchant is nil, exit early
   
-    if active? && merchant.coupons.where(active: true).count >= 5
+    if active? && merchant.coupons.where(active: true).count >= 5 # if both are true validation fails
+      errors.add(:base, "Merchant cannot have more than 5 active coupons")
+    end
+  end
+
+  def max_active_coupons_on_activation
+    return unless merchant && active_changed?(from: false, to: true)
+  
+    if merchant.coupons.where(active: true).count >= 5
       errors.add(:base, "Merchant cannot have more than 5 active coupons")
     end
   end
