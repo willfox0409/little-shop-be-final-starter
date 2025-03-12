@@ -91,5 +91,24 @@ describe Merchant, type: :model do
       expect(merchant.invoices_filtered_by_status("returned")).to eq([inv_5_returned])
       expect(other_merchant.invoices_filtered_by_status("packaged")).to eq([inv_4_packaged])
     end
+
+    it "should return the total number of coupons for a merchant" do
+      merchant = create(:merchant)
+      create_list(:coupon, 4, merchant: merchant)  
+    
+      expect(merchant.coupons_count).to eq(4) 
+    end
+
+    it "should return the count of invoices with applied coupons" do
+      merchant = create(:merchant)
+      customer = create(:customer)
+      coupon = create(:coupon, merchant: merchant)
+      
+      create(:invoice, merchant: merchant, customer: customer, coupon: coupon)  # Invoice with coupon
+      create(:invoice, merchant: merchant, customer: customer, coupon: nil)   # Invoice without coupon
+      create(:invoice, merchant: merchant, customer: customer, coupon: coupon)  # Another invoice with a coupon
+    
+      expect(merchant.invoice_coupon_count).to eq(2) # Should return 2 (only invoices with coupons)
+    end
   end
 end
